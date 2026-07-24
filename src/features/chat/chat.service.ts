@@ -232,7 +232,8 @@ export const chatService = {
    * Delete a message (soft delete — sets is_deleted = true).
    */
   async deleteMessage(messageId: string, forEveryone = false): Promise<void> {
-    const updates: Partial<Message> = { is_deleted: true };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updates: any = { is_deleted: true };
     if (forEveryone) {
       updates.deleted_for_everyone = true;
     }

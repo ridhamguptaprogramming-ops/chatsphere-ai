@@ -1,0 +1,31 @@
+import { Routes, Route } from 'react-router-dom';
+import { ProtectedRoute } from './ProtectedRoute';
+import LoginPage from '@/features/auth/pages/LoginPage';
+import SignupPage from '@/features/auth/pages/SignupPage';
+import MagicLinkPage from '@/features/auth/pages/MagicLinkPage';
+import ForgotPasswordPage from '@/features/auth/pages/ForgotPasswordPage';
+import ResetPasswordPage from '@/features/auth/pages/ResetPasswordPage';
+import AuthCallbackPage from '@/features/auth/pages/AuthCallbackPage';
+import HomePage from '@/pages/HomePage';
+
+export function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/auth/login" element={<LoginPage />} />
+      <Route path="/auth/signup" element={<SignupPage />} />
+      <Route path="/auth/magic-link" element={<MagicLinkPage />} />
+      <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
+
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+  );
+}

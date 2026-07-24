@@ -4,6 +4,11 @@
 
 export type UserRole = 'user' | 'moderator' | 'admin';
 export type PresenceStatus = 'online' | 'offline' | 'away' | 'busy';
+export type ConversationType = 'direct' | 'group';
+export type MemberRole = 'member' | 'moderator' | 'admin' | 'owner';
+export type MessageType = 'text' | 'image' | 'video' | 'audio' | 'document' | 'sticker' | 'gif' | 'system' | 'call';
+export type DeliveryStatus = 'sent' | 'delivered' | 'read';
+export type FriendRequestStatus = 'pending' | 'accepted' | 'declined' | 'cancelled';
 
 export interface Database {
   public: {
@@ -26,6 +31,7 @@ export interface Database {
           custom_status: string | null;
           is_online: boolean;
           last_seen: string | null;
+          privacy_settings: Record<string, unknown>;
           created_at: string;
           updated_at: string;
         };
@@ -53,16 +59,19 @@ export interface Database {
       conversations: {
         Row: {
           id: string;
-          type: 'direct' | 'group';
+          type: ConversationType;
           title: string | null;
+          avatar_url: string | null;
           created_by: string;
+          last_message_at: string | null;
           created_at: string;
           updated_at: string;
         };
         Insert: {
           id?: string;
-          type: 'direct' | 'group';
+          type: ConversationType;
           title?: string | null;
+          avatar_url?: string | null;
           created_by: string;
         };
         Update: Partial<Database['public']['Tables']['conversations']['Insert']>;
@@ -73,8 +82,11 @@ export interface Database {
           id: string;
           conversation_id: string;
           user_id: string;
+          role: MemberRole;
           is_pinned: boolean;
           is_archived: boolean;
+          is_muted: boolean;
+          last_read_message_id: string | null;
           joined_at: string;
           created_at: string;
           updated_at: string;
@@ -83,8 +95,11 @@ export interface Database {
           id?: string;
           conversation_id: string;
           user_id: string;
+          role?: MemberRole;
           is_pinned?: boolean;
           is_archived?: boolean;
+          is_muted?: boolean;
+          last_read_message_id?: string | null;
         };
         Update: Partial<Database['public']['Tables']['conversation_members']['Insert']>;
         Relationships: [];
@@ -94,10 +109,14 @@ export interface Database {
           id: string;
           conversation_id: string;
           sender_id: string;
+          type: MessageType;
           content: string | null;
+          metadata: Record<string, unknown>;
           reply_to_id: string | null;
+          forwarded_from_id: string | null;
           is_edited: boolean;
           is_deleted: boolean;
+          deleted_for_everyone: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -105,10 +124,100 @@ export interface Database {
           id?: string;
           conversation_id: string;
           sender_id: string;
+          type?: MessageType;
           content?: string | null;
+          metadata?: Record<string, unknown>;
           reply_to_id?: string | null;
+          forwarded_from_id?: string | null;
         };
         Update: Partial<Database['public']['Tables']['messages']['Insert']>;
+        Relationships: [];
+      };
+      message_reactions: {
+        Row: {
+          id: string;
+          message_id: string;
+          user_id: string;
+          emoji: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          message_id: string;
+          user_id: string;
+          emoji: string;
+        };
+        Update: Partial<Database['public']['Tables']['message_reactions']['Insert']>;
+        Relationships: [];
+      };
+      read_receipts: {
+        Row: {
+          id: string;
+          message_id: string;
+          user_id: string;
+          status: DeliveryStatus;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          message_id: string;
+          user_id: string;
+          status?: DeliveryStatus;
+        };
+        Update: Partial<Database['public']['Tables']['read_receipts']['Insert']>;
+        Relationships: [];
+      };
+      typing_status: {
+        Row: {
+          id: string;
+          conversation_id: string;
+          user_id: string;
+          is_typing: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          conversation_id: string;
+          user_id: string;
+          is_typing?: boolean;
+        };
+        Update: Partial<Database['public']['Tables']['typing_status']['Insert']>;
+        Relationships: [];
+      };
+      friend_requests: {
+        Row: {
+          id: string;
+          sender_id: string;
+          receiver_id: string;
+          status: FriendRequestStatus;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          sender_id: string;
+          receiver_id: string;
+          status?: FriendRequestStatus;
+        };
+        Update: Partial<Database['public']['Tables']['friend_requests']['Insert']>;
+        Relationships: [];
+      };
+      blocked_users: {
+        Row: {
+          id: string;
+          blocker_id: string;
+          blocked_id: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          blocker_id: string;
+          blocked_id: string;
+        };
+        Update: Partial<Database['public']['Tables']['blocked_users']['Insert']>;
         Relationships: [];
       };
       devices: {
@@ -152,6 +261,10 @@ export interface Database {
         Args: Record<string, never>;
         Returns: boolean;
       };
+      is_moderator_or_above: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
       is_conversation_member: {
         Args: { conversation_id: string };
         Returns: boolean;
@@ -160,3 +273,4 @@ export interface Database {
     Enums: Record<string, never>;
   };
 }
+

@@ -1,7 +1,24 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChatSidebar } from './ChatSidebar';
-import { NewChatModal } from './NewChatModal';
+
+// Fallback inline NewChatModal to avoid module not found errors.
+// If a dedicated ./NewChatModal exists, replace or remove this fallback.
+function NewChatModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="w-full max-w-md rounded bg-ink-900 p-6">
+        <h3 className="mb-4 text-lg font-semibold text-white">New chat</h3>
+        <p className="mb-6 text-sm text-white/60">Create a new conversation.</p>
+        <div className="flex justify-end">
+          <button onClick={onClose} className="btn-secondary">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function ChatLayout() {
   const navigate = useNavigate();

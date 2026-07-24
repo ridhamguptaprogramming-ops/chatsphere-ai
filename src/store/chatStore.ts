@@ -65,7 +65,7 @@ const initialState = {
   isLoadingMessages: false,
 };
 
-export const useChatStore = create<ChatState>((set, get) => ({
+export const useChatStore = create<ChatState>((set) => ({
   ...initialState,
 
   setConversations: (conversations) => set({ conversations, isLoadingConversations: false }),

@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { chatService } from '@/features/chat/chat.service';
 import { useChatStore } from '@/store/chatStore';
-import { useAuthStore } from '@/store/authStore';
 import { useRealtimeMessages } from '@/features/chat/hooks/useRealtimeMessages';
 import { useReadReceipts } from '@/features/chat/hooks/useReadReceipts';
 import { MessageList } from './MessageList';
@@ -20,7 +19,6 @@ export function ChatWindow({ conversationId }: ChatWindowProps) {
   const messages = useChatStore((s) => s.messages[conversationId] || []);
   const setMessages = useChatStore((s) => s.setMessages);
   const isLoading = useChatStore((s) => s.isLoadingMessages);
-  const currentUserId = useAuthStore((s) => s.user?.id);
   const [replyTo, setReplyTo] = useState<MessageWithDetails | null>(null);
   const [hasMore, setHasMore] = useState(true);
 

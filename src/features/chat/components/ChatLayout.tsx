@@ -1,9 +1,7 @@
 import { useState, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ChatSidebar } from './ChatSidebar';
-import { ChatWindow } from './ChatWindow';
 import { NewChatModal } from './NewChatModal';
-import { useChatStore } from '@/store/chatStore';
 
 export function ChatLayout() {
   const navigate = useNavigate();

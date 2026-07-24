@@ -73,7 +73,7 @@ export function MessageList({
               onLoadMore();
             }
           }}
-          itemContent={(index, message) => (
+          itemContent={(_index, message) => (
             <div className="px-4 py-1">
               <MessageBubble
                 message={message}

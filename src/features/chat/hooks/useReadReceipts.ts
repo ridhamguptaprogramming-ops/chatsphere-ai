@@ -11,7 +11,6 @@ export function useReadReceipts(conversationId: string | null) {
   const messages = useChatStore((s) => (conversationId ? s.messages[conversationId] : undefined));
   const currentUserId = useAuthStore((s) => s.user?.id);
   const lastMarkedRef = useRef<string | null>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
 
   const markAsRead = useCallback(
     (messageId: string) => {

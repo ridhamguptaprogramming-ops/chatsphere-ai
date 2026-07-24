@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { chatService } from '@/features/chat/chat.service';
 import { useChatStore } from '@/store/chatStore';
 

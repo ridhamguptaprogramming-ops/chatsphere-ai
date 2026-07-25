@@ -69,12 +69,8 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
       let msg = 'Error creating conversation';
       if (err instanceof Error) {
         msg = err.message;
-      } else if (typeof err === 'object' && err !== null) {
-        // Supabase errors often have a message, error, or details property
-        const obj = err as Record<string, unknown>;
-        msg = (obj.message as string) || (obj.error as string) || (obj.details as string) || JSON.stringify(err);
-      } else if (typeof err === 'string') {
-        msg = err;
+      } else {
+        msg = JSON.stringify(err);
       }
       console.error('Failed to create conversation:', err);
       setError(msg);

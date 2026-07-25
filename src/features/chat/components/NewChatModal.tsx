@@ -97,6 +97,11 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
 
       // Step 2: Create new conversation if none exists
       if (!conversationId) {
+        // Log user info for debugging
+        console.log('[NewChatModal] Creating conversation with userId:', userId);
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('[NewChatModal] Session user ID:', session?.user?.id);
+
         const { data: newConv, error: createErr } = await supabase
           .from('conversations')
           .insert({
@@ -107,7 +112,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
           .single();
 
         if (createErr) {
-          throw new Error(`Failed to create conversation: ${createErr.message || JSON.stringify(createErr)}`);
+          throw new Error(`Failed to create conversation (userId=${userId}): ${createErr.message || JSON.stringify(createErr)}`);
         }
         if (!newConv) {
           throw new Error('Conversation creation returned no data');

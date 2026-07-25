@@ -5,6 +5,16 @@ import { useAuthStore } from '@/store/authStore';
 import type { Database } from '@/types/database.types';
 import { FaSearch, FaTimes, FaSpinner } from 'react-icons/fa';
 
+// Generate a UUID v4 on the client side so we can insert members
+// without having to SELECT back the conversation (which RLS would block)
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
 interface NewChatModalProps {
@@ -57,24 +67,23 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
     setError(null);
 
     try {
-      // Get authenticated user directly from Supabase (not Zustand store)
+      // Get authenticated user directly from Supabase
       const { data: { user: authUser }, error: authErr } = await supabase.auth.getUser();
       if (authErr || !authUser) {
         throw new Error('Not authenticated - please sign in again');
       }
       const userId = authUser.id;
 
-      // Step 1: Check for existing direct conversation
-      let conversationId: string | null = null;
-
-      const { data: myMemberships } = await supabase
+      // Check for existing direct conversation
+      const { data: myConvs, error: _myErr } = await supabase
         .from('conversation_members')
         .select('conversation_id')
         .eq('user_id', userId);
 
-      if (myMemberships && myMemberships.length > 0) {
-        const myIds = myMemberships.map((m) => m.conversation_id);
+      let existingConvId: string | null = null;
 
+      if (myConvs && myConvs.length > 0) {
+        const myIds = myConvs.map((m) => m.conversation_id);
         const { data: shared } = await supabase
           .from('conversation_members')
           .select('conversation_id')
@@ -82,72 +91,67 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
           .eq('user_id', otherUserId);
 
         if (shared && shared.length > 0) {
-          const { data: existingConv } = await supabase
+          const { data: conv } = await supabase
             .from('conversations')
             .select('id')
             .eq('id', shared[0].conversation_id)
             .eq('type', 'direct')
             .maybeSingle();
 
-          if (existingConv) {
-            conversationId = existingConv.id;
+          if (conv) {
+            existingConvId = conv.id;
           }
         }
       }
 
-      // Step 2: Create new conversation if none exists
-      if (!conversationId) {
-        // Log user info for debugging
-        console.log('[NewChatModal] Creating conversation with userId:', userId);
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('[NewChatModal] Session user ID:', session?.user?.id);
-
-        const { data: newConv, error: createErr } = await supabase
-          .from('conversations')
-          .insert({
-            type: 'direct',
-            created_by: userId,
-          })
-          .select('id')
-          .single();
-
-        if (createErr) {
-          throw new Error(`Failed to create conversation (userId=${userId}): ${createErr.message || JSON.stringify(createErr)}`);
-        }
-        if (!newConv) {
-          throw new Error('Conversation creation returned no data');
-        }
-
-        conversationId = newConv.id;
-
-        // Step 3: Add current user as member
-        const { error: addSelfErr } = await supabase
-          .from('conversation_members')
-          .insert({
-            conversation_id: conversationId,
-            user_id: userId,
-            role: 'member',
-          });
-
-        if (addSelfErr) {
-          throw new Error(`Failed to add yourself: ${addSelfErr.message || JSON.stringify(addSelfErr)}`);
-        }
-
-        // Step 4: Add other user as member
-        const { error: addOtherErr } = await supabase
-          .from('conversation_members')
-          .insert({
-            conversation_id: conversationId,
-            user_id: otherUserId,
-            role: 'member',
-          });
-
-        if (addOtherErr) {
-          throw new Error(`Failed to add user: ${addOtherErr.message || JSON.stringify(addOtherErr)}`);
-        }
+      if (existingConvId) {
+        onClose();
+        navigate(`/chat/${existingConvId}`, { replace: true });
+        return;
       }
 
-      // Success - close modal and navigate
+      // Generate conversation ID client-side
+      const conversationId = generateUUID();
+
+      // Insert conversation directly with pre-generated ID
+      const { error: convInsertErr } = await supabase
+        .from('conversations')
+        .insert({
+          id: conversationId,
+          type: 'direct',
+          created_by: userId,
+        });
+
+      if (convInsertErr) {
+        throw new Error(`Failed to create conversation: ${convInsertErr.message || JSON.stringify(convInsertErr)}`);
+      }
+
+      // Add both members
+      const { error: member1Err } = await supabase
+        .from('conversation_members')
+        .insert({
+          conversation_id: conversationId,
+          user_id: userId,
+          role: 'member',
+        });
+
+      if (member1Err) {
+        throw new Error(`Failed to add yourself: ${member1Err.message || JSON.stringify(member1Err)}`);
+      }
+
+      const { error: member2Err } = await supabase
+        .from('conversation_members')
+        .insert({
+          conversation_id: conversationId,
+          user_id: otherUserId,
+          role: 'member',
+        });
+
+      if (member2Err) {
+        throw new Error(`Failed to add user: ${member2Err.message || JSON.stringify(member2Err)}`);
+      }
+
+// Success
       onClose();
       navigate(`/chat/${conversationId}`, { replace: true });
     } catch (err: any) {

@@ -29,8 +29,8 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
     const timer = setTimeout(async () => {
       setIsSearching(true);
       try {
-        // Use `ilike` with % wildcard to search both username and full_name
-        const searchPattern = `%${query}%`;
+        // Use `ilike` with * wildcard (PostgREST syntax) to search both username and full_name
+        const searchPattern = `*${query}*`;
         const { data } = await supabase
           .from('profiles')
           .select('id, username, full_name, avatar_url')

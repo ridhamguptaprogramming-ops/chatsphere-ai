@@ -5,16 +5,6 @@ import { useAuthStore } from '@/store/authStore';
 import type { Database } from '@/types/database.types';
 import { FaSearch, FaTimes, FaSpinner } from 'react-icons/fa';
 
-// Generate a UUID v4 on the client side so we can insert members
-// without having to SELECT back the conversation (which RLS would block)
-function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
-
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
 interface NewChatModalProps {
@@ -110,27 +100,27 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
         return;
       }
 
-      // Generate conversation ID client-side
-      const conversationId = generateUUID();
-
-      // Insert conversation directly with pre-generated ID
-      const { error: convInsertErr } = await supabase
-        .from('conversations')
+      const { data: conversation, error } = await supabase
+        .from("conversations")
         .insert({
-          id: conversationId,
-          type: 'direct',
-          created_by: userId,
-        });
+          type: "direct",
+          created_by: userId
+        })
+        .select()
+        .single();
 
-      if (convInsertErr) {
-        throw new Error(`Failed to create conversation: ${convInsertErr.message || JSON.stringify(convInsertErr)}`);
+      if (error) {
+        console.error("Failed to create conversation:", error);
+        throw error;
       }
+
+      console.log("Conversation created:", conversation);
 
       // Add both members
       const { error: member1Err } = await supabase
         .from('conversation_members')
         .insert({
-          conversation_id: conversationId,
+          conversation_id: conversation.id,
           user_id: userId,
           role: 'member',
         });
@@ -142,7 +132,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
       const { error: member2Err } = await supabase
         .from('conversation_members')
         .insert({
-          conversation_id: conversationId,
+          conversation_id: conversation.id,
           user_id: otherUserId,
           role: 'member',
         });
@@ -153,7 +143,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
 
 // Success
       onClose();
-      navigate(`/chat/${conversationId}`, { replace: true });
+      navigate(`/chat/${conversation.id}`, { replace: true });
     } catch (err: any) {
       const msg = err?.message || err?.error_description || JSON.stringify(err);
       console.error('[NewChatModal] Error:', err);

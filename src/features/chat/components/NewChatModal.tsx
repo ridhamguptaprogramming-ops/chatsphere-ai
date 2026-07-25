@@ -58,7 +58,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
     try {
       const conversationId = await chatService.findOrCreateDirectConversation(userId, currentUserId);
       onClose();
-      navigate(`/chat/${conversationId}`);
+      navigate(`/chat/${conversationId}`, { replace: true });
     } catch (err) {
       console.error('Failed to create conversation:', err);
       setError(err instanceof Error ? err.message : 'Failed to start conversation. Please try again.');
@@ -77,7 +77,11 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
       onClick={handleBackdropClick}
     >
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-ink-900 p-6 shadow-xl">
+      <div
+        className="w-full max-w-md rounded-2xl border border-white/10 bg-ink-900 p-6 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+        style={{ touchAction: 'manipulation' }}
+      >
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-lg font-semibold text-white">New conversation</h2>
@@ -122,7 +126,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
                   key={user.id}
                   onClick={() => handleSelectUser(user.id)}
                   disabled={isCreating}
-                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-white/5 disabled:opacity-50"
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-white/5 active:bg-white/10 disabled:opacity-50"
                 >
                   {user.avatar_url ? (
                     <img

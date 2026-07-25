@@ -378,13 +378,13 @@ export const chatService = {
         .eq('user_id', otherUserId);
 
       if (sharedMemberships?.length) {
-        // Get the conversation to confirm it's a direct type
+        // Use maybeSingle() instead of single() to avoid errors when no match found
         const { data: conv } = await supabase
           .from('conversations')
           .select('id, type')
           .eq('id', sharedMemberships[0].conversation_id)
           .eq('type', 'direct')
-          .single();
+          .maybeSingle();
 
         if (conv) return conv.id;
       }

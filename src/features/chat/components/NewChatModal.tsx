@@ -52,6 +52,10 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
 
   const handleSelectUser = async (userId: string) => {
     if (isProcessing.current) return;
+    if (!currentUserId) {
+      setError('You must be logged in to start a conversation.');
+      return;
+    }
     isProcessing.current = true;
     setProcessingUserId(userId);
     setError(null);

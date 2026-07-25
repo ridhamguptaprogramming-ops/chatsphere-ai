@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { chatService } from '@/features/chat/chat.service';
 import { useAuthStore } from '@/store/authStore';
 import type { Database } from '@/types/database.types';
-import { FaSearch, FaTimes } from 'react-icons/fa';
+import { FaSearch, FaTimes, FaSpinner } from 'react-icons/fa';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -15,10 +15,11 @@ interface NewChatModalProps {
 export function NewChatModal({ onClose }: NewChatModalProps) {
   const navigate = useNavigate();
   const currentUserId = useAuthStore((s) => s.user?.id);
+  const isProcessing = useRef(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Pick<Profile, 'id' | 'username' | 'full_name' | 'avatar_url'>[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
+  const [processingUserId, setProcessingUserId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -30,7 +31,6 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
     const timer = setTimeout(async () => {
       setIsSearching(true);
       try {
-        // Search both username and full_name with ilike using SQL % wildcard
         const searchPattern = `%${query}%`;
         const { data } = await supabase
           .from('profiles')
@@ -51,23 +51,26 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
   }, [query, currentUserId]);
 
   const handleSelectUser = async (userId: string) => {
-    if (isCreating) return;
-    setIsCreating(true);
+    if (isProcessing.current) return;
+    isProcessing.current = true;
+    setProcessingUserId(userId);
     setError(null);
 
     try {
       const conversationId = await chatService.findOrCreateDirectConversation(userId, currentUserId);
       onClose();
-      navigate(`/chat/${conversationId}`, { replace: true });
+      // Navigate after a small delay to ensure onClose completes
+      setTimeout(() => navigate(`/chat/${conversationId}`, { replace: true }), 0);
     } catch (err) {
       console.error('Failed to create conversation:', err);
       setError(err instanceof Error ? err.message : 'Failed to start conversation. Please try again.');
-      setIsCreating(false);
+      isProcessing.current = false;
+      setProcessingUserId(null);
     }
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
+    if (e.target === e.currentTarget && !isProcessing.current) {
       onClose();
     }
   };
@@ -86,6 +89,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-lg font-semibold text-white">New conversation</h2>
           <button
+            type="button"
             onClick={onClose}
             className="rounded-lg p-2 text-white/50 transition-colors hover:bg-white/10 hover:text-white/80"
           >
@@ -121,34 +125,41 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
             </div>
           ) : results.length > 0 ? (
             <div className="space-y-1">
-              {results.map((user) => (
-                <button
-                  key={user.id}
-                  onClick={() => handleSelectUser(user.id)}
-                  disabled={isCreating}
-                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-white/5 active:bg-white/10 disabled:opacity-50"
-                >
-                  {user.avatar_url ? (
-                    <img
-                      src={user.avatar_url}
-                      alt=""
-                      className="h-9 w-9 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sphere-600/40 text-sm font-medium text-white">
-                      {(user.full_name || user.username).charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-sm font-medium text-white/90">
-                      {user.full_name || user.username}
-                    </p>
-                    {user.full_name && (
-                      <p className="text-xs text-white/40">@{user.username}</p>
+              {results.map((user) => {
+                const isLoading = processingUserId === user.id;
+                return (
+                  <button
+                    key={user.id}
+                    type="button"
+                    onClick={() => handleSelectUser(user.id)}
+                    disabled={!!processingUserId}
+                    className="flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-white/5 active:bg-white/10 disabled:cursor-wait disabled:opacity-50"
+                  >
+                    {user.avatar_url ? (
+                      <img
+                        src={user.avatar_url}
+                        alt=""
+                        className="h-9 w-9 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sphere-600/40 text-sm font-medium text-white">
+                        {(user.full_name || user.username).charAt(0).toUpperCase()}
+                      </div>
                     )}
-                  </div>
-                </button>
-              ))}
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-white/90">
+                        {user.full_name || user.username}
+                      </p>
+                      {user.full_name && (
+                        <p className="text-xs text-white/40">@{user.username}</p>
+                      )}
+                    </div>
+                    {isLoading && (
+                      <FaSpinner className="animate-spin text-sphere-400" size={14} />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           ) : query.trim().length >= 2 ? (
             <p className="py-4 text-center text-sm text-white/40">No users found</p>

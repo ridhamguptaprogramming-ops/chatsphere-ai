@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
-import { chatService } from '@/features/chat/chat.service';
 import { useAuthStore } from '@/store/authStore';
 import type { Database } from '@/types/database.types';
 import { FaSearch, FaTimes, FaSpinner } from 'react-icons/fa';
@@ -50,29 +49,102 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
     return () => clearTimeout(timer);
   }, [query, currentUserId]);
 
-  const handleSelectUser = async (userId: string) => {
+  const handleSelectUser = async (otherUserId: string) => {
     if (isProcessing.current) return;
     if (!currentUserId) {
       setError('You must be logged in to start a conversation.');
       return;
     }
+
     isProcessing.current = true;
-    setProcessingUserId(userId);
+    setProcessingUserId(otherUserId);
     setError(null);
 
     try {
-      const conversationId = await chatService.findOrCreateDirectConversation(userId, currentUserId);
-      onClose();
-      // Navigate after a small delay to ensure onClose completes
-      setTimeout(() => navigate(`/chat/${conversationId}`, { replace: true }), 0);
-    } catch (err) {
-      let msg = 'Error creating conversation';
-      if (err instanceof Error) {
-        msg = err.message;
-      } else {
-        msg = JSON.stringify(err);
+      // Step 1: Check for existing direct conversation
+      let conversationId: string | null = null;
+
+      const { data: myMemberships } = await supabase
+        .from('conversation_members')
+        .select('conversation_id')
+        .eq('user_id', currentUserId);
+
+      if (myMemberships && myMemberships.length > 0) {
+        const myIds = myMemberships.map((m) => m.conversation_id);
+
+        const { data: shared } = await supabase
+          .from('conversation_members')
+          .select('conversation_id')
+          .in('conversation_id', myIds)
+          .eq('user_id', otherUserId);
+
+        if (shared && shared.length > 0) {
+          const { data: existingConv } = await supabase
+            .from('conversations')
+            .select('id')
+            .eq('id', shared[0].conversation_id)
+            .eq('type', 'direct')
+            .maybeSingle();
+
+          if (existingConv) {
+            conversationId = existingConv.id;
+          }
+        }
       }
-      console.error('Failed to create conversation:', err);
+
+      // Step 2: Create new conversation if none exists
+      if (!conversationId) {
+        const { data: newConv, error: createErr } = await supabase
+          .from('conversations')
+          .insert({
+            type: 'direct',
+            created_by: currentUserId,
+          })
+          .select('id')
+          .single();
+
+        if (createErr) {
+          throw new Error(`Failed to create conversation: ${createErr.message || JSON.stringify(createErr)}`);
+        }
+        if (!newConv) {
+          throw new Error('Conversation creation returned no data');
+        }
+
+        conversationId = newConv.id;
+
+        // Step 3: Add current user as member
+        const { error: addSelfErr } = await supabase
+          .from('conversation_members')
+          .insert({
+            conversation_id: conversationId,
+            user_id: currentUserId,
+            role: 'member',
+          });
+
+        if (addSelfErr) {
+          throw new Error(`Failed to add yourself: ${addSelfErr.message || JSON.stringify(addSelfErr)}`);
+        }
+
+        // Step 4: Add other user as member
+        const { error: addOtherErr } = await supabase
+          .from('conversation_members')
+          .insert({
+            conversation_id: conversationId,
+            user_id: otherUserId,
+            role: 'member',
+          });
+
+        if (addOtherErr) {
+          throw new Error(`Failed to add user: ${addOtherErr.message || JSON.stringify(addOtherErr)}`);
+        }
+      }
+
+      // Success - close modal and navigate
+      onClose();
+      navigate(`/chat/${conversationId}`, { replace: true });
+    } catch (err: any) {
+      const msg = err?.message || err?.error_description || JSON.stringify(err);
+      console.error('[NewChatModal] Error:', err);
       setError(msg);
       isProcessing.current = false;
       setProcessingUserId(null);
@@ -101,6 +173,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
           <button
             type="button"
             onClick={onClose}
+            disabled={!!processingUserId}
             className="rounded-lg p-2 text-white/50 transition-colors hover:bg-white/10 hover:text-white/80"
           >
             <FaTimes size={16} />
@@ -122,7 +195,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
 
         {/* Error */}
         {error && (
-          <div className="mb-3 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">
+          <div className="mb-3 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400 break-words">
             {error}
           </div>
         )}
@@ -183,3 +256,4 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
     </div>
   );
 }
+

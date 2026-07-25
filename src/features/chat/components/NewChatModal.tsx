@@ -51,23 +51,26 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
 
   const handleSelectUser = async (otherUserId: string) => {
     if (isProcessing.current) return;
-    if (!currentUserId) {
-      setError('You must be logged in to start a conversation.');
-      return;
-    }
 
     isProcessing.current = true;
     setProcessingUserId(otherUserId);
     setError(null);
 
     try {
+      // Get authenticated user directly from Supabase (not Zustand store)
+      const { data: { user: authUser }, error: authErr } = await supabase.auth.getUser();
+      if (authErr || !authUser) {
+        throw new Error('Not authenticated - please sign in again');
+      }
+      const userId = authUser.id;
+
       // Step 1: Check for existing direct conversation
       let conversationId: string | null = null;
 
       const { data: myMemberships } = await supabase
         .from('conversation_members')
         .select('conversation_id')
-        .eq('user_id', currentUserId);
+        .eq('user_id', userId);
 
       if (myMemberships && myMemberships.length > 0) {
         const myIds = myMemberships.map((m) => m.conversation_id);
@@ -98,7 +101,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
           .from('conversations')
           .insert({
             type: 'direct',
-            created_by: currentUserId,
+            created_by: userId,
           })
           .select('id')
           .single();
@@ -117,7 +120,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
           .from('conversation_members')
           .insert({
             conversation_id: conversationId,
-            user_id: currentUserId,
+            user_id: userId,
             role: 'member',
           });
 

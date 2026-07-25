@@ -32,9 +32,9 @@ export function ChatSidebar({
   const filtered = searchQuery.trim()
     ? conversations.filter((c) => {
         const name =
-          c.type === 'direct' && c.otherUser
-            ? c.otherUser.full_name || c.otherUser.username
-            : c.title || '';
+          c.type === 'direct'
+            ? c.otherUser?.full_name || c.otherUser?.username || 'Unknown User'
+            : c.title || 'Group Chat';
         return name.toLowerCase().includes(searchQuery.toLowerCase());
       })
     : conversations;

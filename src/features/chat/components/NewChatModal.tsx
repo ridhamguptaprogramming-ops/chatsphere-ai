@@ -29,10 +29,12 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
     const timer = setTimeout(async () => {
       setIsSearching(true);
       try {
+        // Use `*` as wildcard for PostgREST (the % → * conversion may not apply inside .or() strings)
+        const searchPattern = `*${query}*`;
         const { data } = await supabase
           .from('profiles')
           .select('id, username, full_name, avatar_url')
-          .or(`username.ilike.%${query}%,full_name.ilike.%${query}%`)
+          .or(`username.ilike.${searchPattern},full_name.ilike.${searchPattern}`)
           .neq('id', currentUserId || '')
           .limit(10);
 

@@ -11,8 +11,8 @@ export function ConversationItem({ conversation, isActive, onClick }: Conversati
   const currentUserId = useAuthStore((s) => s.user?.id);
 
   const displayName =
-    conversation.type === 'direct' && conversation.otherUser
-      ? conversation.otherUser.full_name || conversation.otherUser.username
+    conversation.type === 'direct'
+      ? conversation.otherUser?.full_name || conversation.otherUser?.username || 'Unknown User'
       : conversation.title || 'Group Chat';
 
   const displayAvatar = conversation.type === 'direct' && conversation.otherUser

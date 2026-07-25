@@ -25,9 +25,9 @@ export function ChatWindow({ conversationId }: ChatWindowProps) {
   const conversation = conversations.find((c) => c.id === conversationId);
   const otherUser = conversation?.otherUser;
   const displayName =
-    conversation?.type === 'direct' && otherUser
-      ? otherUser.full_name || otherUser.username
-      : conversation?.title || 'Conversation';
+    conversation?.type === 'direct'
+      ? otherUser?.full_name || otherUser?.username || 'Unknown User'
+      : conversation?.title || 'Group Chat';
 
   // Subscribe to realtime updates
   useRealtimeMessages(conversationId);

@@ -120,4 +120,114 @@
   .feature-number {
     @apply text-xs font-semibold tracking-wider text-white/20 font-display;
   }
+
+  /* ---- Auth Page Styles ---- */
+
+  .auth-gradient-bg {
+    background: radial-gradient(ellipse at 20% 50%, rgba(109, 93, 246, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(139, 114, 255, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(86, 70, 224, 0.05) 0%, transparent 50%);
+  }
+
+  .brand-panel-bg {
+    position: relative;
+    overflow: hidden;
+  }
+  .brand-panel-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 40%, rgba(109, 93, 246, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 60%, rgba(139, 114, 255, 0.10) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 90%, rgba(86, 70, 224, 0.08) 0%, transparent 40%);
+    pointer-events: none;
+  }
+
+  .abstract-grid {
+    background-image: linear-gradient(rgba(139, 114, 255, 0.03) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(139, 114, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .glass-card {
+    @apply bg-white/[0.04] backdrop-blur-2xl border border-white/[0.06] shadow-soft rounded-3xl;
+  }
+
+  .glass-card-strong {
+    @apply bg-[#0F0F1A]/90 backdrop-blur-2xl border border-white/[0.08] shadow-card rounded-3xl;
+  }
+
+  .input-auth {
+    @apply w-full rounded-xl bg-white/[0.03] border border-white/[0.06] px-4 py-3 text-sm text-white
+      placeholder:text-white/20 outline-none transition-all duration-300;
+  }
+  .input-auth:focus {
+    @apply border-sphere-400/30 bg-white/[0.05];
+    box-shadow: 0 0 0 4px rgba(139, 114, 255, 0.04), 0 0 20px rgba(139, 114, 255, 0.03);
+  }
+  .input-auth:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px #0F0F1A inset !important;
+    -webkit-text-fill-color: #fff !important;
+    caret-color: #fff;
+  }
+
+  .label-auth {
+    @apply mb-1.5 block text-xs font-medium text-white/40 tracking-wide uppercase;
+  }
+
+  .auth-divider {
+    @apply flex items-center gap-3 my-5;
+  }
+  .auth-divider::before,
+  .auth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.06), transparent);
+  }
+
+  .btn-gradient-auth {
+    @apply relative inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3
+      font-semibold text-white transition-all duration-300 overflow-hidden
+      active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50;
+    background: linear-gradient(135deg, #6D5DF6 0%, #8B72FF 40%, #5646E0 100%);
+    background-size: 200% 200%;
+    box-shadow: 0 4px 20px rgba(109, 93, 246, 0.25);
+  }
+  .btn-gradient-auth:hover:not(:disabled) {
+    background-position: right center;
+    box-shadow: 0 6px 28px rgba(109, 93, 246, 0.35);
+    transform: translateY(-1px);
+  }
+  .btn-gradient-auth::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #8B72FF 0%, #6D5DF6 50%, #4335B3 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .btn-gradient-auth:hover:not(:disabled)::before {
+    opacity: 1;
+  }
+
+  .btn-social {
+    @apply inline-flex items-center justify-center gap-2.5 rounded-xl bg-white/[0.03] px-4 py-2.5
+      font-medium text-white/60 text-sm border border-white/[0.06] transition-all duration-200
+      hover:bg-white/[0.06] hover:border-white/[0.12] hover:text-white active:scale-[0.98]
+      disabled:cursor-not-allowed disabled:opacity-50 w-full;
+  }
+
+  .magic-link {
+    @apply text-xs text-sphere-400 hover:text-sphere-300 transition-colors duration-200
+      underline underline-offset-2 decoration-sphere-400/30 hover:decoration-sphere-300/50;
+  }
+
+  .wave-path {
+    animation: waveFlow 8s ease-in-out infinite alternate;
+  }
+  .wave-path-delayed {
+    animation: waveFlow 12s ease-in-out infinite alternate-reverse;
+  }
 }

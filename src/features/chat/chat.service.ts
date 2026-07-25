@@ -360,37 +360,55 @@ export const chatService = {
       userId = user.id;
     }
 
+    console.log('[chatService] findOrCreateDirectConversation:', { userId, otherUserId });
+
     // Check if a direct conversation already exists between these two users
-    // First, get all conversations where the current user is a member
-    const { data: myConvs } = await supabase
+    const { data: myConvs, error: myConvsErr } = await supabase
       .from('conversation_members')
       .select('conversation_id')
       .eq('user_id', userId);
 
+    if (myConvsErr) {
+      console.error('[chatService] Error fetching my conversations:', myConvsErr);
+      throw myConvsErr;
+    }
+
     if (myConvs?.length) {
       const myConvIds = myConvs.map((c) => c.conversation_id);
 
-      // Check if the other user is a member of any of these conversations (direct only)
-      const { data: sharedMemberships } = await supabase
+      const { data: sharedMemberships, error: sharedErr } = await supabase
         .from('conversation_members')
         .select('conversation_id')
         .in('conversation_id', myConvIds)
         .eq('user_id', otherUserId);
 
+      if (sharedErr) {
+        console.error('[chatService] Error checking shared memberships:', sharedErr);
+        throw sharedErr;
+      }
+
       if (sharedMemberships?.length) {
-        // Use maybeSingle() instead of single() to avoid errors when no match found
-        const { data: conv } = await supabase
+        const { data: conv, error: convCheckErr } = await supabase
           .from('conversations')
           .select('id, type')
           .eq('id', sharedMemberships[0].conversation_id)
           .eq('type', 'direct')
           .maybeSingle();
 
-        if (conv) return conv.id;
+        if (convCheckErr) {
+          console.error('[chatService] Error checking conversation type:', convCheckErr);
+          throw convCheckErr;
+        }
+
+        if (conv) {
+          console.log('[chatService] Found existing conversation:', conv.id);
+          return conv.id;
+        }
       }
     }
 
     // Create a new direct conversation
+    console.log('[chatService] Creating new conversation...');
     const { data: conversation, error: convErr } = await supabase
       .from('conversations')
       .insert({
@@ -400,23 +418,39 @@ export const chatService = {
       .select('id')
       .single();
 
-    if (convErr) throw convErr;
-    if (!conversation) throw new Error('Failed to create conversation');
+    if (convErr) {
+      console.error('[chatService] Error creating conversation:', convErr);
+      throw convErr;
+    }
+    if (!conversation) {
+      throw new Error('Failed to create conversation - no data returned');
+    }
+    console.log('[chatService] Created conversation:', conversation.id);
 
     // Add members sequentially to satisfy RLS:
     // 1. Insert current user first (passes user_id = auth.uid())
-    // 2. Then insert the other user (passes is_conversation_member() since we're now a member)
+    console.log('[chatService] Inserting current user as member...');
     const { error: member1Err } = await supabase
       .from('conversation_members')
       .insert({ conversation_id: conversation.id, user_id: userId, role: 'member' });
 
-    if (member1Err) throw member1Err;
+    if (member1Err) {
+      console.error('[chatService] Error inserting first member:', member1Err);
+      throw member1Err;
+    }
+    console.log('[chatService] First member inserted successfully');
 
+    // 2. Then insert the other user (passes is_conversation_member() since we're now a member)
+    console.log('[chatService] Inserting other user as member...');
     const { error: member2Err } = await supabase
       .from('conversation_members')
       .insert({ conversation_id: conversation.id, user_id: otherUserId, role: 'member' });
 
-    if (member2Err) throw member2Err;
+    if (member2Err) {
+      console.error('[chatService] Error inserting second member:', member2Err);
+      throw member2Err;
+    }
+    console.log('[chatService] Second member inserted successfully');
 
     return conversation.id;
   },

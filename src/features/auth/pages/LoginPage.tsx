@@ -106,14 +106,20 @@ export default function LoginPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2, ease: 'easeOut' }}
           >
-            <h1 className="font-display text-4xl xl:text-5xl font-bold leading-tight text-white">
-              Welcome back to
-              <br />
+            <h1 className="font-display text-5xl xl:text-6xl font-bold leading-[1.1] text-white">
               <span className="bg-gradient-to-r from-sphere-300 via-sphere-400 to-purple-400 bg-clip-text text-transparent">
-                ChatSphere AI
+                Connect.
+              </span>
+              <br />
+              <span className="bg-gradient-to-r from-sphere-200 via-sphere-400 to-indigo-400 bg-clip-text text-transparent">
+                Collaborate.
+              </span>
+              <br />
+              <span className="bg-gradient-to-r from-purple-300 via-sphere-400 to-blue-400 bg-clip-text text-transparent">
+                Converse.
               </span>
             </h1>
-            <p className="mt-4 max-w-md text-base text-white/40 leading-relaxed">
+            <p className="mt-6 max-w-md text-base text-white/40 leading-relaxed">
               Your intelligent conversation platform. Connect, collaborate, and create with your community in real-time.
             </p>
           </motion.div>

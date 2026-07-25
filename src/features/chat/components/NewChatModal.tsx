@@ -144,6 +144,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
             </p>
           )}
         </div>
+      </div>
     </div>
   );
 }

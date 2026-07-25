@@ -403,15 +403,20 @@ export const chatService = {
     if (convErr) throw convErr;
     if (!conversation) throw new Error('Failed to create conversation');
 
-    // Add both users as members
-    const { error: memberErr } = await supabase
+    // Add members sequentially to satisfy RLS:
+    // 1. Insert current user first (passes user_id = auth.uid())
+    // 2. Then insert the other user (passes is_conversation_member() since we're now a member)
+    const { error: member1Err } = await supabase
       .from('conversation_members')
-      .insert([
-        { conversation_id: conversation.id, user_id: userId, role: 'member' },
-        { conversation_id: conversation.id, user_id: otherUserId, role: 'member' },
-      ]);
+      .insert({ conversation_id: conversation.id, user_id: userId, role: 'member' });
 
-    if (memberErr) throw memberErr;
+    if (member1Err) throw member1Err;
+
+    const { error: member2Err } = await supabase
+      .from('conversation_members')
+      .insert({ conversation_id: conversation.id, user_id: otherUserId, role: 'member' });
+
+    if (member2Err) throw member2Err;
 
     return conversation.id;
   },

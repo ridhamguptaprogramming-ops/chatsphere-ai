@@ -62,8 +62,9 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
       // Navigate after a small delay to ensure onClose completes
       setTimeout(() => navigate(`/chat/${conversationId}`, { replace: true }), 0);
     } catch (err) {
-      console.error('Failed to create conversation:', err);
-      setError(err instanceof Error ? err.message : 'Failed to start conversation. Please try again.');
+      const msg = err instanceof Error ? err.message : 'Error creating conversation';
+      console.error('Failed to create conversation:', msg, err);
+      setError(msg);
       isProcessing.current = false;
       setProcessingUserId(null);
     }

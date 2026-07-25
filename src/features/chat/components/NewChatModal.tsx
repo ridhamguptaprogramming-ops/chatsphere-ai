@@ -66,8 +66,17 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
       // Navigate after a small delay to ensure onClose completes
       setTimeout(() => navigate(`/chat/${conversationId}`, { replace: true }), 0);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Error creating conversation';
-      console.error('Failed to create conversation:', msg, err);
+      let msg = 'Error creating conversation';
+      if (err instanceof Error) {
+        msg = err.message;
+      } else if (typeof err === 'object' && err !== null) {
+        // Supabase errors often have a message, error, or details property
+        const obj = err as Record<string, unknown>;
+        msg = (obj.message as string) || (obj.error as string) || (obj.details as string) || JSON.stringify(err);
+      } else if (typeof err === 'string') {
+        msg = err;
+      }
+      console.error('Failed to create conversation:', err);
       setError(msg);
       isProcessing.current = false;
       setProcessingUserId(null);

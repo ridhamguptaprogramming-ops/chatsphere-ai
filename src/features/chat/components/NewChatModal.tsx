@@ -29,8 +29,8 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
     const timer = setTimeout(async () => {
       setIsSearching(true);
       try {
-        // Use `ilike` with * wildcard (PostgREST syntax) to search both username and full_name
-        const searchPattern = `*${query}*`;
+        // Search both username and full_name with ilike using SQL % wildcard
+        const searchPattern = `%${query}%`;
         const { data } = await supabase
           .from('profiles')
           .select('id, username, full_name, avatar_url')
@@ -84,7 +84,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
           >
             <FaTimes size={16} />
           </button>
-      </div>
+        </div>
 
         {/* Search */}
         <div className="relative mb-4">
@@ -97,14 +97,14 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
             autoFocus
             className="w-full rounded-xl bg-white/5 py-2.5 pl-9 pr-4 text-sm text-white placeholder:text-white/30 outline-none focus:bg-white/10 focus:ring-1 focus:ring-sphere-400"
           />
-      </div>
+        </div>
 
         {/* Results */}
         <div className="max-h-60 overflow-y-auto">
           {isSearching ? (
             <div className="flex justify-center py-4">
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-sphere-400" />
-          </div>
+            </div>
           ) : results.length > 0 ? (
             <div className="space-y-1">
               {results.map((user) => (
@@ -123,7 +123,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
                   ) : (
                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sphere-600/40 text-sm font-medium text-white">
                       {(user.full_name || user.username).charAt(0).toUpperCase()}
-                  </div>
+                    </div>
                   )}
                   <div>
                     <p className="text-sm font-medium text-white/90">
@@ -132,10 +132,10 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
                     {user.full_name && (
                       <p className="text-xs text-white/40">@{user.username}</p>
                     )}
-                </div>
+                  </div>
                 </button>
               ))}
-          </div>
+            </div>
           ) : query.trim().length >= 2 ? (
             <p className="py-4 text-center text-sm text-white/40">No users found</p>
           ) : (
@@ -143,12 +143,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
               Type at least 2 characters to search
             </p>
           )}
-      </div>
-      </div>
+        </div>
     </div>
   );
 }
-
-  
-
-

@@ -29,7 +29,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
     const timer = setTimeout(async () => {
       setIsSearching(true);
       try {
-        // Use `*` as wildcard for PostgREST (the % → * conversion may not apply inside .or() strings)
+
         const searchPattern = `*${query}*`;
         const { data } = await supabase
           .from('profiles')

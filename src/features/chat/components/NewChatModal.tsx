@@ -19,6 +19,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
   const [results, setResults] = useState<Pick<Profile, 'id' | 'username' | 'full_name' | 'avatar_url'>[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (query.trim().length < 2) {
@@ -52,13 +53,15 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
   const handleSelectUser = async (userId: string) => {
     if (isCreating) return;
     setIsCreating(true);
+    setError(null);
 
     try {
-      const conversationId = await chatService.findOrCreateDirectConversation(userId);
+      const conversationId = await chatService.findOrCreateDirectConversation(userId, currentUserId);
       onClose();
       navigate(`/chat/${conversationId}`);
     } catch (err) {
       console.error('Failed to create conversation:', err);
+      setError(err instanceof Error ? err.message : 'Failed to start conversation. Please try again.');
       setIsCreating(false);
     }
   };
@@ -98,6 +101,13 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
             className="w-full rounded-xl bg-white/5 py-2.5 pl-9 pr-4 text-sm text-white placeholder:text-white/30 outline-none focus:bg-white/10 focus:ring-1 focus:ring-sphere-400"
           />
         </div>
+
+        {/* Error */}
+        {error && (
+          <div className="mb-3 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">
+            {error}
+          </div>
+        )}
 
         {/* Results */}
         <div className="max-h-60 overflow-y-auto">

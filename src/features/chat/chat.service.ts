@@ -349,17 +349,23 @@ export const chatService = {
 
   /**
    * Find or create a direct conversation with another user.
+   * @param otherUserId - the user to start a conversation with
+   * @param currentUserId - (optional) the authenticated user's ID, to avoid an extra auth fetch
    */
-  async findOrCreateDirectConversation(otherUserId: string): Promise<string> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Not authenticated');
+  async findOrCreateDirectConversation(otherUserId: string, currentUserId?: string): Promise<string> {
+    let userId = currentUserId;
+    if (!userId) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+      userId = user.id;
+    }
 
     // Check if a direct conversation already exists between these two users
     // First, get all conversations where the current user is a member
     const { data: myConvs } = await supabase
       .from('conversation_members')
       .select('conversation_id')
-      .eq('user_id', user.id);
+      .eq('user_id', userId);
 
     if (myConvs?.length) {
       const myConvIds = myConvs.map((c) => c.conversation_id);
@@ -389,7 +395,7 @@ export const chatService = {
       .from('conversations')
       .insert({
         type: 'direct',
-        created_by: user.id,
+        created_by: userId,
       })
       .select('id')
       .single();
@@ -401,7 +407,7 @@ export const chatService = {
     const { error: memberErr } = await supabase
       .from('conversation_members')
       .insert([
-        { conversation_id: conversation.id, user_id: user.id, role: 'member' },
+        { conversation_id: conversation.id, user_id: userId, role: 'member' },
         { conversation_id: conversation.id, user_id: otherUserId, role: 'member' },
       ]);
 

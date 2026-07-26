@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useTyping } from '@/features/chat/hooks/useTyping';
 import { EmojiPickerWrapper } from './EmojiPickerWrapper';
 import type { MessageWithDetails } from '@/store/chatStore';
-import { FaPaperPlane } from 'react-icons/fa';
+import { Send, Paperclip, X } from 'lucide-react';
 
 interface MessageComposerProps {
   conversationId: string;
@@ -83,10 +83,10 @@ export function MessageComposer({ conversationId, replyTo, onCancelReply }: Mess
   };
 
   return (
-    <div className="border-t border-white/10 bg-ink-950 px-4 py-3">
+    <div className="composer-glass flex-shrink-0">
       {/* Reply preview */}
       {replyTo && (
-        <div className="mb-2 flex items-center gap-2 rounded-lg border-l-2 border-sphere-400 bg-white/5 px-3 py-2">
+        <div className="flex items-center gap-3 border-b border-white/[0.04] px-4 py-2">
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-sphere-300">
               Replying to {replyTo.sender.full_name || replyTo.sender.username}
@@ -97,21 +97,21 @@ export function MessageComposer({ conversationId, replyTo, onCancelReply }: Mess
           </div>
           <button
             onClick={onCancelReply}
-            className="text-white/40 hover:text-white/80"
+            className="flex h-6 w-6 items-center justify-center rounded-md text-white/30 hover:text-white/60 transition-colors"
           >
-            ✕
+            <X size={14} />
           </button>
         </div>
       )}
 
-      <div className="flex items-end gap-2">
+      <div className="flex items-end gap-2 px-4 py-3">
         <EmojiPickerWrapper
           isOpen={isEmojiOpen}
           onToggle={() => setIsEmojiOpen(!isEmojiOpen)}
           onEmojiSelect={handleEmojiSelect}
         />
 
-        <div className="flex-1">
+        <div className="flex flex-1 items-end gap-2 rounded-xl bg-white/[0.04] border border-white/[0.06] px-3 transition-all duration-200 focus-within:border-sphere-400/40 focus-within:bg-white/[0.06] focus-within:shadow-[0_0_0_3px_rgba(139,114,255,0.06),0_0_16px_rgba(139,114,255,0.04)]">
           <textarea
             ref={textareaRef}
             value={content}
@@ -119,17 +119,23 @@ export function MessageComposer({ conversationId, replyTo, onCancelReply }: Mess
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
             rows={1}
-            className="w-full resize-none rounded-xl bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 outline-none transition-colors focus:bg-white/10 focus:ring-1 focus:ring-sphere-400"
+            className="flex-1 resize-none bg-transparent py-2.5 text-sm text-white placeholder:text-white/30 outline-none"
             style={{ maxHeight: '120px' }}
           />
+          <button
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-white/30 hover:text-white/60 transition-colors flex-shrink-0"
+            title="Attach file"
+          >
+            <Paperclip size={16} />
+          </button>
         </div>
 
         <button
           onClick={handleSend}
           disabled={!content.trim() || isSending}
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-sphere-500 text-white transition-all hover:bg-sphere-400 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sphere-500 to-sphere-600 text-white shadow-sm shadow-sphere-500/30 transition-all duration-200 hover:from-sphere-400 hover:to-sphere-500 hover:shadow-md hover:shadow-sphere-500/40 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-none"
         >
-          <FaPaperPlane size={14} />
+          <Send size={15} />
         </button>
       </div>
     </div>

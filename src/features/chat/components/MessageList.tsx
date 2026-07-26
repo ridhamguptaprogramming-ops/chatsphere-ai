@@ -3,6 +3,7 @@ import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 import { MessageBubble } from './MessageBubble';
 import { TypingIndicator } from './TypingIndicator';
 import type { MessageWithDetails } from '@/store/chatStore';
+import { MessageCircle } from 'lucide-react';
 
 interface MessageListProps {
   conversationId: string;
@@ -44,7 +45,10 @@ export function MessageList({
   if (isLoading && !messages.length) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-sphere-400" />
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-sphere-400" />
+          <p className="text-sm text-white/40">Loading messages...</p>
+        </div>
       </div>
     );
   }
@@ -52,9 +56,17 @@ export function MessageList({
   if (!messages.length) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <p className="text-sm text-white/40">
-          No messages yet. Start the conversation!
-        </p>
+        <div className="text-center max-w-xs px-4">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.03] border border-white/[0.06]">
+            <MessageCircle size={24} className="text-white/30" />
+          </div>
+          <p className="text-sm font-medium text-white/50 mb-1">
+            No messages yet
+          </p>
+          <p className="text-xs text-white/30 leading-relaxed">
+            Send a message to start the conversation!
+          </p>
+        </div>
       </div>
     );
   }
@@ -74,7 +86,7 @@ export function MessageList({
             }
           }}
           itemContent={(_index, message) => (
-            <div className="px-4 py-1">
+            <div className="px-4 py-0.5">
               <MessageBubble
                 message={message}
                 conversationId={conversationId}
@@ -86,7 +98,7 @@ export function MessageList({
             Header: () =>
               hasMore ? (
                 <div className="flex justify-center py-4">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-sphere-400" />
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-sphere-400" />
                 </div>
               ) : null,
           }}

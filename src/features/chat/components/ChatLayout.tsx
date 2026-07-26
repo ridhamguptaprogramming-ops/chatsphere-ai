@@ -1,14 +1,15 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChatSidebar } from './ChatSidebar';
+import { MessageCircle, Plus, Shield, Lock, Eye } from 'lucide-react';
 
 // Fallback inline NewChatModal to avoid module not found errors.
 // If a dedicated ./NewChatModal exists, replace or remove this fallback.
 function NewChatModal({ onClose }: { onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded bg-ink-900 p-6">
-        <h3 className="mb-4 text-lg font-semibold text-white">New chat</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-ink-900 p-6 shadow-xl">
+        <h3 className="font-display mb-4 text-lg font-semibold text-white">New chat</h3>
         <p className="mb-6 text-sm text-white/60">Create a new conversation.</p>
         <div className="flex justify-end">
           <button onClick={onClose} className="btn-secondary">
@@ -47,35 +48,61 @@ export function ChatLayout() {
       </div>
 
       {/* Main content area — no conversation selected */}
-      <div className="flex flex-1 items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-sphere-600/20">
-            <svg
-              className="h-8 w-8 text-sphere-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden">
+        {/* Purple radial glow background */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="h-[500px] w-[500px] rounded-full bg-sphere-500/5 blur-[120px]" />
+        </div>
+
+        {/* Empty state content */}
+        <div className="relative z-10 empty-state-fade-in text-center max-w-md px-6">
+          {/* Glowing icon */}
+          <div className="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center">
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-sphere-500/30 to-indigo-500/30 blur-xl animate-pulse" />
+            <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-sphere-500/20 to-indigo-500/20 border border-white/[0.08] shadow-lg shadow-sphere-500/10">
+              <MessageCircle
+                size={36}
+                className="text-sphere-400"
                 strokeWidth={1.5}
-                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
               />
-            </svg>
+            </div>
           </div>
-          <h2 className="font-display text-xl font-semibold text-white/80">
-            Select a conversation
-          </h2>
-          <p className="mt-1 text-sm text-white/40">
-            Choose a chat from the sidebar or start a new one
+
+          <h1 className="font-display text-2xl font-bold text-white mb-2">
+            Welcome to ChatSphere
+          </h1>
+          <p className="text-base text-white/50 font-medium mb-1">
+            Your conversations start here.
           </p>
+          <p className="text-sm text-white/30 leading-relaxed mb-8">
+            Start a conversation, share ideas, and connect with people who matter.
+          </p>
+
           <button
             onClick={handleStartNewChat}
-            className="btn-primary mt-6"
+            className="btn-gradient inline-flex items-center gap-2 px-6 py-3"
           >
+            <Plus size={18} />
             Start new chat
           </button>
+
+          {/* Footer */}
+          <div className="mt-12 flex items-center justify-center gap-4 text-xs text-white/20">
+            <span className="flex items-center gap-1.5">
+              <Shield size={12} />
+              Secure
+            </span>
+            <span className="w-1 h-1 rounded-full bg-white/20" />
+            <span className="flex items-center gap-1.5">
+              <Lock size={12} />
+              Private
+            </span>
+            <span className="w-1 h-1 rounded-full bg-white/20" />
+            <span className="flex items-center gap-1.5">
+              <Eye size={12} />
+              Connected
+            </span>
+          </div>
         </div>
       </div>
 

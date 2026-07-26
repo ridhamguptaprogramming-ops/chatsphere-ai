@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { FaSmile } from 'react-icons/fa';
+import { Smile } from 'lucide-react';
 
 // Inline emoji picker — lightweight set of common emojis
 const EMOJI_CATEGORIES: { name: string; emojis: string[] }[] = [
@@ -51,19 +51,19 @@ export function EmojiPickerWrapper({ onEmojiSelect, isOpen, onToggle }: EmojiPic
       <button
         type="button"
         onClick={onToggle}
-        className="rounded-lg p-2 text-white/50 transition-colors hover:bg-white/10 hover:text-white/80"
+        className="flex h-8 w-8 items-center justify-center rounded-lg text-white/40 transition-all duration-200 hover:bg-white/[0.06] hover:text-white/70 active:scale-95"
         title="Add emoji"
       >
-        <FaSmile size={18} />
+        <Smile size={18} />
       </button>
 
       {isOpen && (
         <div
           ref={pickerRef}
-          className="absolute bottom-full left-0 z-50 mb-2 h-72 w-72 overflow-hidden rounded-xl border border-white/10 bg-ink-900 shadow-xl"
+          className="absolute bottom-full left-0 z-50 mb-2 h-72 w-72 overflow-hidden rounded-xl border border-white/[0.08] bg-ink-900 shadow-xl shadow-black/40"
         >
           {/* Category tabs */}
-          <div className="flex border-b border-white/10">
+          <div className="flex border-b border-white/[0.06]">
             {EMOJI_CATEGORIES.map((cat, index) => (
               <button
                 key={cat.name}

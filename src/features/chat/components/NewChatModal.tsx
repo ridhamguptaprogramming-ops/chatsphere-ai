@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/store/authStore';
 import type { Database } from '@/types/database.types';
-import { FaSearch, FaTimes, FaSpinner } from 'react-icons/fa';
+import { Search, X, Loader2 } from 'lucide-react';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -176,15 +176,15 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
             type="button"
             onClick={onClose}
             disabled={!!processingUserId}
-            className="rounded-lg p-2 text-white/50 transition-colors hover:bg-white/10 hover:text-white/80"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-white/10 hover:text-white/80"
           >
-            <FaTimes size={16} />
+            <X size={16} />
           </button>
         </div>
 
         {/* Search */}
         <div className="relative mb-4">
-          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={12} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={14} />
           <input
             type="text"
             value={query}
@@ -206,7 +206,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
         <div className="max-h-60 overflow-y-auto">
           {isSearching ? (
             <div className="flex justify-center py-4">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-sphere-400" />
+              <Loader2 className="h-5 w-5 animate-spin text-sphere-400" />
             </div>
           ) : results.length > 0 ? (
             <div className="space-y-1">
@@ -227,7 +227,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
                         className="h-9 w-9 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-sphere-600/40 text-sm font-medium text-white">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-sphere-500/40 to-indigo-500/40 text-sm font-medium text-white">
                         {(user.full_name || user.username).charAt(0).toUpperCase()}
                       </div>
                     )}
@@ -240,7 +240,7 @@ export function NewChatModal({ onClose }: NewChatModalProps) {
                       )}
                     </div>
                     {isLoading && (
-                      <FaSpinner className="animate-spin text-sphere-400" size={14} />
+                      <Loader2 className="animate-spin text-sphere-400" size={14} />
                     )}
                   </button>
                 );

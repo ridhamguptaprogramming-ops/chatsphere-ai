@@ -9,6 +9,7 @@ import AuthCallbackPage from '@/features/auth/pages/AuthCallbackPage';
 import HomePage from '@/pages/HomePage';
 import ChatPage from '@/features/chat/pages/ChatPage';
 import ProfilePage from '@/features/profile/pages/ProfilePage';
+import SettingsPage from '@/features/settings/pages/SettingsPage';
 
 export function AppRoutes() {
   return (
@@ -44,6 +45,15 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <SettingsPage />
           </ProtectedRoute>
         }
       />

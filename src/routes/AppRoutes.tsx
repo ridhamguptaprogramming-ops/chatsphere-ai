@@ -8,6 +8,7 @@ import ResetPasswordPage from '@/features/auth/pages/ResetPasswordPage';
 import AuthCallbackPage from '@/features/auth/pages/AuthCallbackPage';
 import HomePage from '@/pages/HomePage';
 import ChatPage from '@/features/chat/pages/ChatPage';
+import ProfilePage from '@/features/profile/pages/ProfilePage';
 
 export function AppRoutes() {
   return (
@@ -34,6 +35,15 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <ChatPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
           </ProtectedRoute>
         }
       />

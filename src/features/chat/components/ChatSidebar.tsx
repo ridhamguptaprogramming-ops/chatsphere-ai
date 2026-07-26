@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { chatService } from '@/features/chat/chat.service';
 import { useChatStore } from '@/store/chatStore';
 import { ConversationItem } from './ConversationItem';
@@ -26,6 +27,7 @@ export function ChatSidebar({
   onSelectConversation,
   onStartNewChat,
 }: ChatSidebarProps) {
+  const navigate = useNavigate();
   const conversations = useChatStore((s) => s.conversations);
   const setConversations = useChatStore((s) => s.setConversations);
   const isLoading = useChatStore((s) => s.isLoadingConversations);
@@ -202,6 +204,7 @@ export function ChatSidebar({
           >
             <div className="py-1">
               <button
+                onClick={() => { navigate('/profile'); setShowProfileMenu(false); }}
                 className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-white/70 transition-colors hover:bg-white/[0.04] hover:text-white"
               >
                 <User size={15} className="text-white/40" />

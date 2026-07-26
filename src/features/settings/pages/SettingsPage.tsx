@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useSettingsStore } from '@/store/settingsStore';
 import { Logo } from '@/features/auth/components/Logo';
 import {
   ArrowLeft,
@@ -24,6 +24,7 @@ import {
   Image,
 } from 'lucide-react';
 import { authService } from '@/services/auth.service';
+import { useState } from 'react';
 
 type SettingToggleProps = {
   label: string;
@@ -64,31 +65,7 @@ function SettingToggle({ label, description, enabled, onChange, icon }: SettingT
 export default function SettingsPage() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-
-  // General
-  const [darkMode, setDarkMode] = useState(true);
-  const [language, setLanguage] = useState('en');
-
-  // Notifications
-  const [pushNotifications, setPushNotifications] = useState(true);
-  const [messageNotifications, setMessageNotifications] = useState(true);
-  const [groupNotifications, setGroupNotifications] = useState(true);
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [vibrateEnabled, setVibrateEnabled] = useState(false);
-  const [showPreview, setShowPreview] = useState(true);
-
-  // Privacy
-  const [readReceipts, setReadReceipts] = useState(true);
-  const [typingIndicator, setTypingIndicator] = useState(true);
-  const [onlineStatus, setOnlineStatus] = useState(true);
-  const [saveChatHistory, setSaveChatHistory] = useState(true);
-
-  // Chat
-  const [enterToSend, setEnterToSend] = useState(true);
-  const [showMedia, setShowMedia] = useState(true);
-  const [autoplayGifs, setAutoplayGifs] = useState(true);
-
-  // Account action states
+  const settings = useSettingsStore();
   const [isResetting, setIsResetting] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -148,8 +125,8 @@ export default function SettingsPage() {
               icon={<Moon size={15} className="text-sphere-400" />}
               label="Dark Mode"
               description="Use dark theme throughout the app"
-              enabled={darkMode}
-              onChange={setDarkMode}
+              enabled={settings.darkMode}
+              onChange={settings.setDarkMode}
             />
             <div className="flex items-center gap-4 px-6 py-4">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.03] border border-white/[0.06] flex-shrink-0">
@@ -160,8 +137,8 @@ export default function SettingsPage() {
                 <p className="text-xs text-white/40 mt-0.5">App display language</p>
               </div>
               <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
+                value={settings.language}
+                onChange={(e) => settings.setLanguage(e.target.value as typeof settings.language)}
                 className="rounded-lg bg-white/[0.06] border border-white/[0.08] px-3 py-1.5 text-sm text-white/80 outline-none focus:border-sphere-400/40 transition-colors"
               >
                 <option value="en">English</option>
@@ -190,43 +167,47 @@ export default function SettingsPage() {
               icon={<BellRing size={15} className="text-sphere-400" />}
               label="Push Notifications"
               description="Receive push notifications when the app is closed"
-              enabled={pushNotifications}
-              onChange={setPushNotifications}
+              enabled={settings.pushNotifications}
+              onChange={settings.setPushNotifications}
             />
             <SettingToggle
               icon={<MessageSquare size={15} className="text-sphere-400" />}
               label="Message Notifications"
               description="Notify me when I receive a new message"
-              enabled={messageNotifications}
-              onChange={setMessageNotifications}
+              enabled={settings.messageNotifications}
+              onChange={settings.setMessageNotifications}
             />
             <SettingToggle
               icon={<Users size={15} className="text-sphere-400" />}
               label="Group Notifications"
               description="Notify me for group chat messages"
-              enabled={groupNotifications}
-              onChange={setGroupNotifications}
+              enabled={settings.groupNotifications}
+              onChange={settings.setGroupNotifications}
             />
             <SettingToggle
               icon={<Volume2 size={15} className="text-sphere-400" />}
               label="Sound"
               description="Play sound for incoming messages"
-              enabled={soundEnabled}
-              onChange={setSoundEnabled}
+              enabled={settings.soundEnabled}
+              onChange={settings.setSoundEnabled}
             />
             <SettingToggle
               icon={<Vibrate size={15} className="text-sphere-400" />}
               label="Vibrate"
               description="Vibrate on new messages"
-              enabled={vibrateEnabled}
-              onChange={setVibrateEnabled}
+              enabled={settings.vibrateEnabled}
+              onChange={settings.setVibrateEnabled}
             />
             <SettingToggle
-              icon={showPreview ? <Eye size={15} className="text-sphere-400" /> : <EyeOff size={15} className="text-sphere-400" />}
+              icon={
+                settings.showPreview
+                  ? <Eye size={15} className="text-sphere-400" />
+                  : <EyeOff size={15} className="text-sphere-400" />
+              }
               label="Message Preview"
               description="Show message preview in notifications"
-              enabled={showPreview}
-              onChange={setShowPreview}
+              enabled={settings.showPreview}
+              onChange={settings.setShowPreview}
             />
           </div>
         </div>
@@ -246,29 +227,29 @@ export default function SettingsPage() {
               icon={<Eye size={15} className="text-sphere-400" />}
               label="Read Receipts"
               description="Let others see when you've read their messages"
-              enabled={readReceipts}
-              onChange={setReadReceipts}
+              enabled={settings.readReceipts}
+              onChange={settings.setReadReceipts}
             />
             <SettingToggle
               icon={<MessageSquare size={15} className="text-sphere-400" />}
               label="Typing Indicator"
               description="Show when you're typing a message"
-              enabled={typingIndicator}
-              onChange={setTypingIndicator}
+              enabled={settings.typingIndicator}
+              onChange={settings.setTypingIndicator}
             />
             <SettingToggle
               icon={<Eye size={15} className="text-sphere-400" />}
               label="Online Status"
               description="Let others see when you're online"
-              enabled={onlineStatus}
-              onChange={setOnlineStatus}
+              enabled={settings.onlineStatus}
+              onChange={settings.setOnlineStatus}
             />
             <SettingToggle
               icon={<Lock size={15} className="text-sphere-400" />}
               label="Save Chat History"
               description="Keep a history of your conversations"
-              enabled={saveChatHistory}
-              onChange={setSaveChatHistory}
+              enabled={settings.saveChatHistory}
+              onChange={settings.setSaveChatHistory}
             />
           </div>
         </div>
@@ -288,22 +269,22 @@ export default function SettingsPage() {
               icon={<Key size={15} className="text-sphere-400" />}
               label="Enter to Send"
               description="Press Enter to send, Shift+Enter for new line"
-              enabled={enterToSend}
-              onChange={setEnterToSend}
+              enabled={settings.enterToSend}
+              onChange={settings.setEnterToSend}
             />
             <SettingToggle
               icon={<Image size={15} className="text-sphere-400" />}
               label="Auto-download Media"
               description="Automatically download images and videos"
-              enabled={showMedia}
-              onChange={setShowMedia}
+              enabled={settings.autoDownloadMedia}
+              onChange={settings.setAutoDownloadMedia}
             />
             <SettingToggle
               icon={<Image size={15} className="text-sphere-400" />}
               label="Autoplay GIFs"
               description="Automatically play animated GIFs"
-              enabled={autoplayGifs}
-              onChange={setAutoplayGifs}
+              enabled={settings.autoplayGifs}
+              onChange={settings.setAutoplayGifs}
             />
           </div>
         </div>

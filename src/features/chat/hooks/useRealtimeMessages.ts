@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useChatStore } from '@/store/chatStore';
+import { useSettingsStore } from '@/store/settingsStore';
+import { useAuthStore } from '@/store/authStore';
 import type { Database } from '@/types/database.types';
 import type { MessageWithDetails } from '@/store/chatStore';
 
@@ -15,6 +17,9 @@ export function useRealtimeMessages(conversationId: string | null) {
   const addReceipt = useChatStore((s) => s.addReceipt);
   const addTypingUser = useChatStore((s) => s.addTypingUser);
   const removeTypingUser = useChatStore((s) => s.removeTypingUser);
+  const messageNotifications = useSettingsStore((s) => s.messageNotifications);
+  const soundEnabled = useSettingsStore((s) => s.soundEnabled);
+  const currentUserId = useAuthStore((s) => s.user?.id);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const currentConvRef = useRef(conversationId);
 
@@ -57,6 +62,8 @@ export function useRealtimeMessages(conversationId: string | null) {
             .eq('id', newMessage.sender_id)
             .single();
 
+          const isFromOther = newMessage.sender_id !== currentUserId;
+
           const messageWithDetails: MessageWithDetails = {
             ...newMessage,
             sender: sender || { id: newMessage.sender_id, username: 'Unknown', full_name: null, avatar_url: null },
@@ -66,6 +73,11 @@ export function useRealtimeMessages(conversationId: string | null) {
           };
 
           addMessage(conversationId, messageWithDetails);
+
+          // Play sound for incoming messages from others
+          if (isFromOther && soundEnabled && messageNotifications && window.__chatsphere_play_sound) {
+            window.__chatsphere_play_sound();
+          }
         }
       )
       .on(

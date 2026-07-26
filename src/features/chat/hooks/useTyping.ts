@@ -1,17 +1,20 @@
 import { useRef, useCallback } from 'react';
 import { chatService } from '@/features/chat/chat.service';
+import { useSettingsStore } from '@/store/settingsStore';
 
 /**
  * Hook to manage typing indicator broadcasting.
  * Uses a debounce approach — fires is_typing = true immediately on keystroke,
  * then sets is_typing = false after a period of inactivity.
+ * Respects the typingIndicator setting.
  */
 export function useTyping(conversationId: string | null) {
+  const typingIndicator = useSettingsStore((s) => s.typingIndicator);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isCurrentlyTyping = useRef(false);
 
   const startTyping = useCallback(() => {
-    if (!conversationId) return;
+    if (!conversationId || !typingIndicator) return;
 
     if (!isCurrentlyTyping.current) {
       isCurrentlyTyping.current = true;
@@ -32,7 +35,7 @@ export function useTyping(conversationId: string | null) {
         chatService.setTyping(conversationId, false).catch(() => {});
       }
     }, 3000);
-  }, [conversationId]);
+  }, [conversationId, typingIndicator]);
 
   const stopTyping = useCallback(() => {
     if (typingTimeoutRef.current) {

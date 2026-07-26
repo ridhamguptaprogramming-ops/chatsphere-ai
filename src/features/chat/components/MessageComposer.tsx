@@ -3,6 +3,7 @@ import { chatService } from '@/features/chat/chat.service';
 import { useChatStore } from '@/store/chatStore';
 import { useAuthStore } from '@/store/authStore';
 import { useTyping } from '@/features/chat/hooks/useTyping';
+import { useSettingsStore } from '@/store/settingsStore';
 import { EmojiPickerWrapper } from './EmojiPickerWrapper';
 import type { MessageWithDetails } from '@/store/chatStore';
 import { Send, Paperclip, X } from 'lucide-react';
@@ -21,6 +22,7 @@ export function MessageComposer({ conversationId, replyTo, onCancelReply }: Mess
   const addMessage = useChatStore((s) => s.addMessage);
   const currentUserId = useAuthStore((s) => s.user?.id);
   const { startTyping, stopTyping } = useTyping(conversationId);
+  const enterToSend = useSettingsStore((s) => s.enterToSend);
 
   const handleSend = useCallback(async () => {
     const trimmed = content.trim();
@@ -59,9 +61,18 @@ export function MessageComposer({ conversationId, replyTo, onCancelReply }: Mess
   }, [content, conversationId, replyTo, isSending, stopTyping, currentUserId, addMessage, onCancelReply]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+    if (enterToSend) {
+      // Enter sends, Shift+Enter adds new line
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    } else {
+      // Enter adds new line, Ctrl+Enter sends
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        handleSend();
+      }
     }
   };
 

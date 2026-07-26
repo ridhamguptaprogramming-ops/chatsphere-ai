@@ -1,20 +1,16 @@
-# ChatSphere Redesign - Completed ✅
+# ChatSphere Settings + Real-time wiring - Done ✅
 
 ## All Steps Completed
-- [x] Read and analyze all existing code files
-- [x] Create comprehensive redesign plan
-- [x] Plan approved by user
-- [x] Step 1: Add new CSS animations to `index.css`
-- [x] Step 2: Redesign `ConversationItem.tsx` - Premium styling
-- [x] Step 3: Redesign `ChatSidebar.tsx` - Premium header, search, user profile at bottom
-- [x] Step 4: Redesign `ChatPage.tsx` - Premium empty state, mobile drawer
-- [x] Step 5: Redesign `ChatLayout.tsx` - Premium empty state
-- [x] Step 6: Redesign `ChatWindow.tsx` - Premium glassmorphism header, lucide-react migration
-- [x] Step 7: Redesign `MessageList.tsx` - Improved empty state
-- [x] Step 8: Redesign `MessageBubble.tsx` - Premium styling, animations
-- [x] Step 9: Redesign `MessageComposer.tsx` - Premium glassmorphism design
-- [x] Step 10: Redesign `EmojiPickerWrapper.tsx` - lucide-react migration
-- [x] Step 11: Update `NewChatModal.tsx` - lucide-react migration
-- [x] Step 12: Build and verify TypeScript compilation
-- [x] Step 13: Create Profile page with edit functionality + route + navigation
+- [x] Created settings store (`src/store/settingsStore.ts`) with Zustand + persistence (localStorage)
+- [x] Created Settings page (`src/features/settings/pages/SettingsPage.tsx`) with full UI
+- [x] Added `/settings` route to `AppRoutes.tsx`
+- [x] Wired Settings button in ChatSidebar to `/settings`
+
+### Real-time settings wired:
+- [x] **Dark Mode** - Toggles `dark` class on `<html>` element via `SettingsWatcher`
+- [x] **Sound** - Web Audio API plays a subtle chime on new messages (respects `soundEnabled`)
+- [x] **Message Notifications** - Sound only plays when `messageNotifications` is enabled
+- [x] **Enter to Send** - Changes keyboard behavior in MessageComposer (Enter sends vs Ctrl+Enter sends)
+- [x] **Typing Indicator** - Disables broadcasting typing status when turned off
+- [x] **Read Receipts** - Disables marking messages as read when turned off
 

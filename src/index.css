@@ -125,32 +125,6 @@
 
   /* ---- Auth Page Styles ---- */
 
-  .auth-gradient-bg {
-    background: radial-gradient(ellipse at 20% 50%, rgba(109, 93, 246, 0.08) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 20%, rgba(139, 114, 255, 0.06) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 80%, rgba(86, 70, 224, 0.05) 0%, transparent 50%);
-  }
-
-  .brand-panel-bg {
-    position: relative;
-    overflow: hidden;
-  }
-  .brand-panel-bg::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at 30% 40%, rgba(109, 93, 246, 0.15) 0%, transparent 60%),
-                radial-gradient(ellipse at 70% 60%, rgba(139, 114, 255, 0.10) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 90%, rgba(86, 70, 224, 0.08) 0%, transparent 40%);
-    pointer-events: none;
-  }
-
-  .abstract-grid {
-    background-image: linear-gradient(rgba(139, 114, 255, 0.03) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(139, 114, 255, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-  }
-
   .glass-card {
     @apply bg-white/[0.04] backdrop-blur-2xl border border-white/[0.06] shadow-soft rounded-3xl;
   }
@@ -224,13 +198,6 @@
   .magic-link {
     @apply text-xs text-sphere-400 hover:text-sphere-300 transition-colors duration-200
       underline underline-offset-2 decoration-sphere-400/30 hover:decoration-sphere-300/50;
-  }
-
-  .wave-path {
-    animation: waveFlow 8s ease-in-out infinite alternate;
-  }
-  .wave-path-delayed {
-    animation: waveFlow 12s ease-in-out infinite alternate-reverse;
   }
 
   /* ---- Chat UI Styles ---- */

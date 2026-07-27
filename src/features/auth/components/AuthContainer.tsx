@@ -8,12 +8,15 @@ interface AuthContainerProps {
 
 export function AuthContainer({ children }: AuthContainerProps) {
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-ink-950 auth-gradient-bg p-4 sm:p-6 lg:p-8">
-      {/* Ambient background glows */}
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-ink-950 p-4 sm:p-6 lg:p-8">
+      {/* Subtle photographic-inspired ambient background */}
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-40 left-1/2 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-sphere-600/20 blur-[120px]" />
-        <div className="absolute bottom-[-10rem] right-[-6rem] h-[28rem] w-[28rem] rounded-full bg-sphere-400/15 blur-[100px]" />
-        <div className="absolute top-1/3 left-[10%] h-[20rem] w-[20rem] rounded-full bg-indigo-500/10 blur-[80px]" />
+        {/* Dark base with soft gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0B0B14] via-[#0F0B1A] to-[#0B0B14]" />
+        {/* Soft radial glows simulating real photographic lighting */}
+        <div className="absolute top-[-5%] left-[15%] h-[50vh] w-[30vw] rounded-full bg-sphere-500/8 blur-[100px]" />
+        <div className="absolute bottom-[10%] right-[20%] h-[40vh] w-[25vw] rounded-full bg-indigo-500/6 blur-[80px]" />
+        <div className="absolute top-[40%] left-[40%] h-[30vh] w-[30vw] rounded-full bg-sphere-400/5 blur-[100px]" />
       </div>
 
       {/* Main container */}
